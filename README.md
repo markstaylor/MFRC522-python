@@ -10,7 +10,7 @@ Until the package is on PyPi, clone this repository and run `python setup.py ins
 
 ## Example Code
 
-The following code will read a tag from the MFRC522
+The following code will read a Mifare Classic tag from the MFRC522
 
 ```python
 from time import sleep
@@ -22,6 +22,25 @@ try:
     while True:
         print("Hold a tag near the reader")
         id, text = reader.read()
+        print("ID: %s\nText: %s" % (id,text))
+        sleep(5)
+except KeyboardInterrupt:
+    GPIO.cleanup()
+    raise
+```
+
+While the following will read a MiFare Ultralight
+
+```python
+from time import sleep
+import sys
+from mfrc522 import SimpleMFRC522
+reader = SimpleMFRC522()
+
+try:
+    while True:
+        print("Hold a tag near the reader")
+        id, text = reader.dump_ul()
         print("ID: %s\nText: %s" % (id,text))
         sleep(5)
 except KeyboardInterrupt:
