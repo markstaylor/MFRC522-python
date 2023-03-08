@@ -19,6 +19,12 @@ class SimpleMFRC522:
           id, text = self.read_no_block()
       return id, text
 
+  def dump_ul(self):
+      id, text = self.dump_ul_no_block()
+      while not id:
+          id, text = self.dump_ul_no_block()
+      return id, text
+
   def read_id(self):
     id = self.read_id_no_block()
     while not id:
@@ -34,6 +40,31 @@ class SimpleMFRC522:
           return None
       return self.uid_to_num(uid)
   
+  def dump_ul_no_block(self):
+    (status, TagType) = self.READER.MFRC522_Request(self.READER.PICC_REQIDL)
+    if status != self.READER.MI_OK:
+        return None, None
+    (status, uid) = self.READER.MFRC522_Anticoll()
+    if status != self.READER.MI_OK:
+        return None, None
+    id = self.uid_to_num(uid)
+    self.READER.MFRC522_SelectTag(uid)
+    data = []
+    text_read = ''
+    if status == self.READER.MI_OK:
+            block_num = 0
+        while True:
+            block = self.READER.MFRC522_Read(block_num)
+            if block:
+                data += block
+                block_num = block_num + 4
+            else:
+              break
+        if data:
+             text_read = ''.join(chr(i) for i in data)
+    self.READER.MFRC522_StopCrypto1()
+    return id, text_read
+
   def read_no_block(self):
     (status, TagType) = self.READER.MFRC522_Request(self.READER.PICC_REQIDL)
     if status != self.READER.MI_OK:
